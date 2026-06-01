@@ -1,0 +1,26 @@
+# =============================================================================
+# Ventana-Work Backend — Dependencias Python
+# =============================================================================
+
+# --- Web Framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# --- ORM & Database ---
+sqlalchemy==2.0.35
+psycopg2-binary==2.9.9       # Driver PostgreSQL (binary para dev, usar psycopg2 en prod)
+geoalchemy2==0.15.2           # Extensión SQLAlchemy para PostGIS
+shapely==2.0.6                # Manipulación de geometrías en Python
+
+# --- Validación & Serialización ---
+pydantic==2.9.2
+pydantic-settings==2.5.2     # BaseSettings para config desde .env
+email-validator==2.2.0        # Validación de formato de email
+
+# --- Seguridad ---
+python-jose[cryptography]==3.3.0   # JWT tokens
+passlib[bcrypt]==1.7.4              # Hashing de contraseñas
+python-multipart==0.0.12           # Form data (login)
+
+# --- Utilidades ---
+alembic==1.13.3               # Migraciones de base de datos

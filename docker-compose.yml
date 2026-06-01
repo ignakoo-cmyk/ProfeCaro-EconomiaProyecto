@@ -1,0 +1,82 @@
+# =============================================================================
+# Ventana-Work v2 — Docker Compose
+# =============================================================================
+# Levanta la plataforma completa (DB, Backend, Frontend).
+# =============================================================================
+
+version: "3.9"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Base de Datos (PostgreSQL + PostGIS)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: ventana-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ventana}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ventana_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-ventana_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ventana} -d ${POSTGRES_DB:-ventana_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ventana-network
+
+  # ---------------------------------------------------------------------------
+  # Backend (FastAPI)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ventana-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ventana}:${POSTGRES_PASSWORD:-ventana_secret}@db:5432/${POSTGRES_DB:-ventana_db}
+      PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-10}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      # Montar código fuente para hot-reload en desarrollo
+      - ./backend/app:/code/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ventana-network
+
+  # ---------------------------------------------------------------------------
+  # Frontend (Next.js)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ventana-frontend
+    restart: unless-stopped
+    environment:
+      # URL interna para fetch desde el servidor (SSR)
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ventana-network
+
+networks:
+  ventana-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

@@ -1,0 +1,22 @@
+# Environment variables
+.env
+
+# Next.js
+frontend/.next
+frontend/node_modules
+frontend/out
+frontend/build
+frontend/.turbo
+
+# Python
+backend/__pycache__
+backend/venv
+backend/.env
+backend/.pytest_cache
+
+# Database volumes (if any local)
+postgres-data/
+
+# OS specific
+.DS_Store
+Thumbs.db

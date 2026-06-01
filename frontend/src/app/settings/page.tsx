@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   User, 
   Camera, 
@@ -17,11 +18,20 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "wallet" | "billing">("profile");
   const [name, setName] = useState(user?.fullName || "");
   const [bio, setBio] = useState("Estudiante de Ingeniería Civil · UAHurtado · Disponible tardes.");
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
 
   const handleSave = () => {
     setSaved(true);
@@ -29,6 +39,8 @@ export default function SettingsPage() {
   };
 
   const isPyme = user?.userType === "PYME";
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-grid-pattern">

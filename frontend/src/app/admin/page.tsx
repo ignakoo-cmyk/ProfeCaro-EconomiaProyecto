@@ -21,7 +21,7 @@ import {
 
 export default function AdminControlCenter() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -63,6 +63,9 @@ export default function AdminControlCenter() {
             <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer shadow-md">
               <span className="text-xs font-black text-white">A</span>
             </div>
+            <button onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+              Salir
+            </button>
           </div>
         </div>
       </header>

@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import Base, engine
 from app.routers import jobs
+from app.routers.ws import router as ws_router, rest_router as jobs_realtime_router
 from app.seed import seed_admin_user
 
 
@@ -83,6 +84,8 @@ app.add_middleware(
 # Registrar Routers
 # =============================================================================
 app.include_router(jobs.router)
+app.include_router(jobs_realtime_router)
+app.include_router(ws_router)
 
 
 # =============================================================================

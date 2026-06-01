@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import CreateJobModal from "@/components/CreateJobModal";
+import EmployerJobMonitor from "@/components/EmployerJobMonitor";
 
 export default function PymeDashboard() {
-  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -50,7 +63,16 @@ export default function PymeDashboard() {
           </button>
         </div>
 
-        {/* Data Table (Simulada para visualización de UI limpia) */}
+        {/* Real-time Job Monitor */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span className="inline-block h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse" />
+            Monitor en Vivo — Job #VW-8492
+          </h2>
+          <EmployerJobMonitor />
+        </div>
+
+        {/* Data Table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <h3 className="font-bold text-slate-900">Trabajos Activos (Hoy)</h3>

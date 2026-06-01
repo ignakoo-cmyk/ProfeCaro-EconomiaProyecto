@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import AgreementModal from "@/components/AgreementModal";
+import ActiveJobView from "@/components/ActiveJobView";
 import type { MicroJob } from "@/lib/api";
 import { MapPin, Settings, Zap, Filter } from "lucide-react";
 
@@ -54,10 +56,19 @@ const DEMO_JOBS: Array<MicroJob & { distance?: number; location?: string; tasks?
 ];
 
 export default function StudentDashboard() {
-  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [balance, setBalance] = useState(35000);
   const [agreementJob, setAgreementJob] = useState<typeof DEMO_JOBS[0] | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
 
   const handleWithdraw = () => {
     setIsWithdrawing(true);
@@ -74,6 +85,8 @@ export default function StudentDashboard() {
   };
 
   const netAmount = (price: number) => price - Math.round(price * 0.1);
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-grid-pattern flex flex-col">
@@ -132,6 +145,15 @@ export default function StudentDashboard() {
               )}
             </button>
           </div>
+        </div>
+
+        {/* Active Job Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span className="inline-block h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse" />
+            Turno en Curso — Job #VW-8492
+          </h3>
+          <ActiveJobView />
         </div>
 
         {/* Jobs Section */}

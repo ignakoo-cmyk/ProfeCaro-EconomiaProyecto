@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore } from "@/features/auth/services/sessionStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -28,10 +28,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, router]);
+  }, []);
 
   const handleSave = () => {
     setSaved(true);

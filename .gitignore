@@ -9,7 +9,9 @@ frontend/build
 frontend/.turbo
 
 # Python
-backend/__pycache__
+**/__pycache__/
+*.py[cod]
+*$py.class
 backend/venv
 backend/.env
 backend/.pytest_cache

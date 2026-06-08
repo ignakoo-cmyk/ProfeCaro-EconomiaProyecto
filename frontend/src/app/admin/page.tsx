@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore } from "@/features/auth/services/sessionStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -16,7 +16,8 @@ import {
   Search,
   MoreVertical,
   Activity,
-  Zap
+  Zap,
+  LogOut
 } from "lucide-react";
 
 export default function AdminControlCenter() {
@@ -24,10 +25,16 @@ export default function AdminControlCenter() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated || user?.userType !== "ADMIN") {
-      router.push("/login");
+    // Role protection still needed if a student tries to access /admin
+    if (isAuthenticated && user && user.userType !== "ADMIN") {
+      router.push("/");
     }
   }, [isAuthenticated, user, router]);
 
@@ -63,7 +70,11 @@ export default function AdminControlCenter() {
             <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer shadow-md">
               <span className="text-xs font-black text-white">A</span>
             </div>
-            <button onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-red-600 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
               Salir
             </button>
           </div>

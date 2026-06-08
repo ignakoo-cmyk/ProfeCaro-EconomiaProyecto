@@ -66,7 +66,7 @@ type JobStore = JobState & JobActions;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export const useJobStore = create<JobStore>((set, get) => ({
+export const useJobStore = create<JobStore>((set) => ({
   // --- Estado Inicial ---
   jobs: [],
   selectedJob: null,

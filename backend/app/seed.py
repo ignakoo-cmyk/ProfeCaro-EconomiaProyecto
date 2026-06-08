@@ -30,13 +30,12 @@ def seed_admin_user():
         
         if not admin:
             print("🚀 Creando usuario ADMIN semilla...")
-            hashed_pw = get_password_hash("admin")
+            hashed_pw = get_password_hash("admin123")
             new_admin = User(
                 email=admin_email,
                 hashed_password=hashed_pw,
                 full_name="Super Administrador",
                 user_type=UserType.ADMIN,
-                # is_premium y data_tracking_consent toman defaults
             )
             db.add(new_admin)
             db.commit()

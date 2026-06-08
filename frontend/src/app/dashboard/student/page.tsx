@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
-import AgreementModal from "@/components/AgreementModal";
-import ActiveJobView from "@/components/ActiveJobView";
-import type { MicroJob } from "@/lib/api";
-import { MapPin, Settings, Zap, Filter } from "lucide-react";
+import { useAuthStore } from "@/features/auth/services/sessionStore";
+import AgreementModal from "@/features/business/features/contracts/AgreementModal";
+import { Settings, LogOut } from "lucide-react";
+import LiveGigFeed from "@/features/student/features/dashboard/LiveGigFeed";
+import ActionCenter from "@/features/student/features/dashboard/ActionCenter";
+import type { DashboardJob } from "@/features/student/features/dashboard/JobCard";
 
-const DEMO_JOBS: Array<MicroJob & { distance?: number; location?: string; tasks?: string[] }> = [
+const DEMO_JOBS: DashboardJob[] = [
   {
     id: "job-1",
     title: "Mesero/a Extra para hora punta",
@@ -25,6 +26,7 @@ const DEMO_JOBS: Array<MicroJob & { distance?: number; location?: string; tasks?
     created_at: new Date().toISOString(),
     distance: 150,
     location: "Cafetería Central UAH",
+    urgency: true,
     tasks: [
       "Apoyar en atención de mesas durante hora punta.",
       "Manejo de bandeja y servicio de bebidas.",
@@ -47,6 +49,7 @@ const DEMO_JOBS: Array<MicroJob & { distance?: number; location?: string; tasks?
     created_at: new Date().toISOString(),
     distance: 400,
     location: "Librería Sur",
+    urgency: false,
     tasks: [
       "Armar y sellar cajas de cartón para despachos del día.",
       "Etiquetar paquetes con órdenes de envío.",
@@ -57,42 +60,34 @@ const DEMO_JOBS: Array<MicroJob & { distance?: number; location?: string; tasks?
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [balance, setBalance] = useState(35000);
-  const [agreementJob, setAgreementJob] = useState<typeof DEMO_JOBS[0] | null>(null);
+  const [agreementJob, setAgreementJob] = useState<DashboardJob | null>(null);
+
+  // In a real app this comes from Zustand/Backend
+  const balance = 35000;
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, router]);
-
-  const handleWithdraw = () => {
-    setIsWithdrawing(true);
-    setTimeout(() => {
-      setBalance(0);
-      setIsWithdrawing(false);
-      alert("Transferencia Flash a tu CuentaRUT realizada con éxito 💸");
-    }, 1500);
-  };
+  }, []);
 
   const handleAcceptJob = () => {
     setAgreementJob(null);
     alert("✅ ¡Compromiso confirmado! El empleador ha sido notificado.");
   };
 
-  const netAmount = (price: number) => price - Math.round(price * 0.1);
-
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-grid-pattern flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen bg-grid-pattern bg-slate-50/50 flex flex-col">
+      {/* Header Minimalista */}
       <header className="bg-white/80 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
-        <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
+        <div className="mx-auto max-w-[1400px] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-full overflow-hidden bg-slate-200 border-2 border-slate-300 shadow-sm">
               <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" className="h-full w-full object-cover" />
@@ -111,99 +106,33 @@ export default function StudentDashboard() {
             <Link href="/settings" className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
               <Settings className="h-4 w-4 text-slate-500" />
             </Link>
-            <button onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-red-600 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
               Salir
             </button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 mx-auto max-w-5xl px-6 py-8 w-full">
-
-        {/* Balance Panel */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 md:p-8 mb-8 text-white relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Zap className="h-4 w-4 text-blue-400" />
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Saldo Disponible</p>
-              </div>
-              <h2 className="text-5xl md:text-6xl font-black tracking-tight">${balance.toLocaleString("es-CL")}</h2>
-              <p className="text-sm text-slate-400 mt-2">Has aprovechado <span className="text-white font-bold">2 ventanas</span> esta semana.</p>
-            </div>
-            <button
-              onClick={handleWithdraw}
-              disabled={isWithdrawing || balance === 0}
-              className="w-full md:w-auto px-8 py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 shadow-lg shadow-emerald-500/30 text-white"
-            >
-              {isWithdrawing ? (
-                <span className="animate-pulse">Transfiriendo...</span>
-              ) : (
-                "Retiro Flash a CuentaRUT"
-              )}
-            </button>
-          </div>
+      {/* Main Layout Asimétrico */}
+      <main className="flex-1 mx-auto max-w-[1400px] px-6 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Columna Izquierda (65% -> 8 de 12 columnas) */}
+        <div className="lg:col-span-8">
+          <LiveGigFeed jobs={DEMO_JOBS} onSelectJob={setAgreementJob} />
         </div>
 
-        {/* Active Job Section */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <span className="inline-block h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse" />
-            Turno en Curso — Job #VW-8492
-          </h3>
-          <ActiveJobView />
+        {/* Columna Derecha (35% -> 4 de 12 columnas) */}
+        <div className="lg:col-span-4">
+          <ActionCenter balance={balance} />
         </div>
 
-        {/* Jobs Section */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              Trabajos a 500m
-            </h3>
-            <p className="text-sm text-slate-500 mt-0.5">Por tu Nivel Plata, ves estas ofertas 5 min antes.</p>
-          </div>
-          <button className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 shadow-sm">
-            <Filter className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {DEMO_JOBS.map((job) => (
-            <div key={job.id} className="glass-panel bg-white rounded-2xl p-6 flex flex-col hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1 pr-4">
-                  <h4 className="font-bold text-slate-900 text-base leading-tight mb-1">{job.title}</h4>
-                  <p className="text-xs text-slate-500">{job.location} · {job.distance}m</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xl font-black text-slate-900">${netAmount(job.price_clp).toLocaleString("es-CL")}</p>
-                  <p className="text-xs text-slate-400 font-medium">líquido</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-500 mb-5 flex-1">{job.description}</p>
-              <div className="flex items-center gap-2 text-xs text-slate-500 mb-5">
-                <span className="bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg font-medium">
-                  ⏱ {job.duration_hours}h
-                </span>
-                <span className="bg-blue-50 border border-blue-100 text-blue-700 px-2 py-1 rounded-lg font-medium">
-                  ${job.price_clp.toLocaleString("es-CL")} bruto
-                </span>
-              </div>
-              <button
-                onClick={() => setAgreementJob(job)}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all text-sm shadow-md shadow-blue-200 flex items-center justify-center gap-2"
-              >
-                Ver Acuerdo y Postular
-              </button>
-            </div>
-          ))}
-        </div>
       </main>
 
-      {/* Agreement Modal */}
+      {/* Modal de Acuerdo */}
       {agreementJob && (
         <AgreementModal
           isOpen={true}

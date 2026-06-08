@@ -2,19 +2,17 @@
 
 import { useJobRealtime } from "@/hooks/useJobRealtime";
 import { useState } from "react";
-import { MapPin, Phone, Wifi, WifiOff, CheckCircle2, Clock, Zap } from "lucide-react";
+import { MapPin, Phone, Wifi, WifiOff, CheckCircle2, Clock } from "lucide-react";
 
 const DEMO_JOB_ID = "VW-8492";
 
 export default function ActiveJobView() {
   const { jobState, isConnected, connectionMode, markArrived, lastUpdated } = useJobRealtime(DEMO_JOB_ID);
   const [marking, setMarking] = useState(false);
-  const [markedArrived, setMarkedArrived] = useState(false);
 
   const handleMarkArrived = async () => {
     setMarking(true);
     await markArrived();
-    setMarkedArrived(true);
     setMarking(false);
   };
 

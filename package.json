@@ -1,0 +1,14 @@
+{
+  "name": "ventana-work-workspace",
+  "version": "1.0.0",
+  "description": "Root workspace to manage Ventana-Work Docker development",
+  "scripts": {
+    "dev": "docker-compose up",
+    "dev:build": "docker-compose up --build",
+    "down": "docker-compose down",
+    "clean": "docker-compose down -v"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

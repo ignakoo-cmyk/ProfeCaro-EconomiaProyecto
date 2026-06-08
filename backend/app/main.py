@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import Base, engine
 from app.routers import jobs
+from app.routers.auth import router as auth_router
 from app.routers.ws import router as ws_router, rest_router as jobs_realtime_router
 from app.seed import seed_admin_user
 
@@ -32,9 +33,23 @@ async def lifespan(app: FastAPI):
       - Limpieza de recursos (si aplica).
     """
     # --- Startup ---
-    # Crear tablas (desarrollo). En prod, usar: alembic upgrade head
-    Base.metadata.create_all(bind=engine)
-    print("✅ Tablas creadas/verificadas en PostgreSQL + PostGIS")
+    # Reintentar conexión con la base de datos si está arrancando
+    import time
+    from sqlalchemy.exc import OperationalError
+    
+    retries = 15
+    while retries > 0:
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("✅ Tablas creadas/verificadas en PostgreSQL + PostGIS")
+            break
+        except OperationalError as e:
+            retries -= 1
+            print(f"⏳ Esperando a que PostgreSQL esté listo ({retries} intentos restantes)...")
+            time.sleep(2)
+    else:
+        # Si fallaron todos los intentos, lanzar el error original
+        Base.metadata.create_all(bind=engine)
     
     # Crear admin por defecto si no existe
     seed_admin_user()
@@ -73,6 +88,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",    # Next.js dev server
         "http://127.0.0.1:3000",
+        "http://localhost:4001",    # Nuevo puerto del frontend
+        "http://127.0.0.1:4001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -83,6 +100,7 @@ app.add_middleware(
 # =============================================================================
 # Registrar Routers
 # =============================================================================
+app.include_router(auth_router)
 app.include_router(jobs.router)
 app.include_router(jobs_realtime_router)
 app.include_router(ws_router)

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
-import CreateJobModal from "@/components/CreateJobModal";
-import EmployerJobMonitor from "@/components/EmployerJobMonitor";
+import { useAuthStore } from "@/features/auth/services/sessionStore";
+import CreateJobModal from "@/features/business/features/gig-management/CreateJobModal";
+import EmployerJobMonitor from "@/features/business/features/gig-management/EmployerJobMonitor";
+import { LogOut } from "lucide-react";
 
 export default function PymeDashboard() {
   const router = useRouter();
@@ -13,12 +13,14 @@ export default function PymeDashboard() {
   const [mounted, setMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, router]);
+  }, []);
 
   if (!mounted) return null;
 
@@ -37,7 +39,11 @@ export default function PymeDashboard() {
             </div>
           </div>
           
-          <button onClick={logout} className="text-sm font-semibold text-slate-500 hover:text-slate-800">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-red-600 transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
             Cerrar Sesión
           </button>
         </div>

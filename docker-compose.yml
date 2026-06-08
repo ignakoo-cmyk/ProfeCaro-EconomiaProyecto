@@ -1,14 +1,14 @@
 # =============================================================================
 # Ventana-Work v2 — Docker Compose
 # =============================================================================
-# Levanta la plataforma completa (DB, Backend, Frontend).
+# Orquestación con PostgreSQL + Hot Module Replacement (HMR) Activo
 # =============================================================================
 
 version: "3.9"
 
 services:
   # ---------------------------------------------------------------------------
-  # Base de Datos (PostgreSQL + PostGIS)
+  # 1. Base de Datos (PostgreSQL + PostGIS)
   # ---------------------------------------------------------------------------
   db:
     image: postgis/postgis:16-3.4
@@ -31,7 +31,7 @@ services:
       - ventana-network
 
   # ---------------------------------------------------------------------------
-  # Backend (FastAPI)
+  # 2. Backend (Python/FastAPI)
   # ---------------------------------------------------------------------------
   backend:
     build:
@@ -39,6 +39,8 @@ services:
       dockerfile: Dockerfile
     container_name: ventana-backend
     restart: unless-stopped
+    # Hot-Reload Activo
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-ventana}:${POSTGRES_PASSWORD:-ventana_secret}@db:5432/${POSTGRES_DB:-ventana_db}
       PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-10}
@@ -47,7 +49,7 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       # Montar código fuente para hot-reload en desarrollo
-      - ./backend/app:/code/app
+      - ./backend:/code
     depends_on:
       db:
         condition: service_healthy
@@ -55,19 +57,30 @@ services:
       - ventana-network
 
   # ---------------------------------------------------------------------------
-  # Frontend (Next.js)
+  # 3. Frontend (Next.js)
   # ---------------------------------------------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: deps # Apunta a la etapa de dependencias
     container_name: ventana-frontend
     restart: unless-stopped
+    command: npm run dev
     environment:
       # URL interna para fetch desde el servidor (SSR)
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      PORT: 4001
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
     ports:
-      - "3000:3000"
+      - "4001:4001" # Mapeo host 4001 -> contenedor 4001
+    volumes:
+      # Bind mount del código fuente para HMR
+      - ./frontend:/app
+      # Ignorar carpetas locales para evitar colisiones con el Linux interno
+      - /app/node_modules
+      - /app/.next
     depends_on:
       - backend
     networks:

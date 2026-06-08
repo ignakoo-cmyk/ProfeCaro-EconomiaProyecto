@@ -2,7 +2,7 @@
 
 import { useJobRealtime } from "@/hooks/useJobRealtime";
 import { useState } from "react";
-import { CheckCircle2, AlertTriangle, Gift, Star, Activity, Wifi, WifiOff, Clock } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Gift, Star, Activity, Wifi, WifiOff } from "lucide-react";
 
 const DEMO_JOB_ID = "VW-8492";
 

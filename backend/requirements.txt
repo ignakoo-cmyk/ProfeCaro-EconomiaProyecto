@@ -19,8 +19,9 @@ email-validator==2.2.0        # Validación de formato de email
 
 # --- Seguridad ---
 python-jose[cryptography]==3.3.0   # JWT tokens
-passlib[bcrypt]==1.7.4              # Hashing de contraseñas
-python-multipart==0.0.12           # Form data (login)
+passlib==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.12
 
 # --- Utilidades ---
 alembic==1.13.3               # Migraciones de base de datos

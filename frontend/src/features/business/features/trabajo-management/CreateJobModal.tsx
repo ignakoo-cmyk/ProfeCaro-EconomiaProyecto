@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, X, CheckCircle, Clock, MapPin, FileText } from "lucide-react";
+import { useAuthStore } from "@/features/auth/services/sessionStore";
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface CreateJobModalProps {
 }
 
 export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
+  const { token } = useAuthStore();
   const [title, setTitle] = useState("");
   const [netSalary, setNetSalary] = useState("");
   const [description, setDescription] = useState("");
@@ -40,15 +42,52 @@ export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps)
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!complianceAgreed) return;
     setSubmitting(true);
-    setTimeout(() => {
+    
+    try {
+      const sDate = new Date(`1970-01-01T${startTime}:00`);
+      const eDate = new Date(`1970-01-01T${endTime}:00`);
+      let duration = (eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60);
+      if (duration < 0) duration += 24;
+      if (duration < 1.0) duration = 1.0;
+      if (duration > 3.0) duration = 3.0; // constrained by schema
+
+      const isoStartTime = new Date(`${startDate}T${startTime}:00`).toISOString();
+
+      const response = await fetch("http://localhost:8009/api/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          price_clp: parseInt(netSalary),
+          duration_hours: duration,
+          start_time: isoStartTime,
+          latitude: -33.444, // Default mock for location for now
+          longitude: -70.655
+        })
+      });
+
+      if (response.ok) {
+        alert("✅ Trabajo verificado publicado con éxito. Los estudiantes cercanos serán notificados.");
+        // Reset form
+        setTitle(""); setNetSalary(""); setDescription(""); setStartDate(""); setStartTime(""); setEndTime(""); setLocation(""); setComplianceAgreed(false);
+        onClose();
+      } else {
+        const err = await response.json();
+        alert("Error al publicar el trabajo: " + JSON.stringify(err));
+      }
+    } catch (err) {
+      alert("Error de conexión al publicar el trabajo.");
+    } finally {
       setSubmitting(false);
-      alert("✅ Oferta verificada publicada con éxito. Los estudiantes cercanos serán notificados.");
-      onClose();
-    }, 1500);
+    }
   };
 
   return (
@@ -82,9 +121,9 @@ export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps)
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Plantillas Rápidas Verificadas</p>
             <div className="flex gap-2 overflow-x-auto pb-1">
-              <button onClick={() => applyTemplate("mesero")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">☕ Mesero/a</button>
-              <button onClick={() => applyTemplate("repartidor")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">🚴 Repartidor/a</button>
-              <button onClick={() => applyTemplate("inventario")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">📦 Inventario</button>
+              <button type="button" onClick={() => applyTemplate("mesero")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">☕ Mesero/a</button>
+              <button type="button" onClick={() => applyTemplate("repartidor")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">🚴 Repartidor/a</button>
+              <button type="button" onClick={() => applyTemplate("inventario")} className="shrink-0 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors">📦 Inventario</button>
             </div>
           </div>
 
@@ -146,8 +185,9 @@ export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps)
                 placeholder="Describe con exactitud las tareas, condiciones de trabajo, materiales provistos y cualquier requisito específico (ej. ropa, herramientas, experiencia)..."
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all shadow-sm text-sm resize-none"
                 required
+                minLength={10}
               />
-              <p className="text-xs text-slate-400 mt-1">{description.length} caracteres · Mínimo recomendado: 100</p>
+              <p className="text-xs text-slate-400 mt-1">{description.length} caracteres · Mínimo requerido: 10</p>
             </div>
 
             {/* Date & Time */}
@@ -255,3 +295,4 @@ export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps)
     </div>
   );
 }
+

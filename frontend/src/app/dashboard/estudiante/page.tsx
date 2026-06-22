@@ -6,63 +6,17 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/services/sessionStore";
 import AgreementModal from "@/features/business/features/contracts/AgreementModal";
 import { Settings, LogOut } from "lucide-react";
-import LiveGigFeed from "@/features/student/features/dashboard/LiveGigFeed";
+import LiveTrabajoFeed from "@/features/student/features/dashboard/LiveTrabajoFeed";
 import ActionCenter from "@/features/student/features/dashboard/ActionCenter";
 import type { DashboardJob } from "@/features/student/features/dashboard/JobCard";
 
-const DEMO_JOBS: DashboardJob[] = [
-  {
-    id: "job-1",
-    title: "Mesero/a Extra para hora punta",
-    description: "Apoyo urgente para el almuerzo. Pago de +20% por urgencia.",
-    price_clp: 18000,
-    duration_hours: 2,
-    start_time: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-    status: "PUBLISHED",
-    employer_id: "emp-1",
-    worker_id: null,
-    latitude: 0,
-    longitude: 0,
-    created_at: new Date().toISOString(),
-    distance: 150,
-    location: "Cafetería Central UAH",
-    urgency: true,
-    tasks: [
-      "Apoyar en atención de mesas durante hora punta.",
-      "Manejo de bandeja y servicio de bebidas.",
-      "Mantener el orden del área asignada.",
-      "Reportarse con el encargado de turno al llegar.",
-    ],
-  },
-  {
-    id: "job-2",
-    title: "Armado de cajas para despacho",
-    description: "Necesitamos ayuda empacando pedidos online.",
-    price_clp: 12000,
-    duration_hours: 1.5,
-    start_time: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    status: "PUBLISHED",
-    employer_id: "emp-2",
-    worker_id: null,
-    latitude: 0,
-    longitude: 0,
-    created_at: new Date().toISOString(),
-    distance: 400,
-    location: "Librería Sur",
-    urgency: false,
-    tasks: [
-      "Armar y sellar cajas de cartón para despachos del día.",
-      "Etiquetar paquetes con órdenes de envío.",
-      "Ordenar el área de bodega al finalizar.",
-    ],
-  },
-];
-
 export default function StudentDashboard() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [agreementJob, setAgreementJob] = useState<DashboardJob | null>(null);
+  const [jobs, setJobs] = useState<DashboardJob[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
 
   // In a real app this comes from Zustand/Backend
   const balance = 35000;
@@ -72,13 +26,39 @@ export default function StudentDashboard() {
     router.push("/");
   };
 
+  const fetchJobsFeed = async () => {
+    setIsLoadingJobs(true);
+    try {
+      const res = await fetch("http://localhost:8009/api/jobs/feed?radius_km=10.0&lat=-33.444&lon=-70.655", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setJobs(data);
+      }
+    } catch (err) {
+      console.error("Error fetching job feed:", err);
+    } finally {
+      setIsLoadingJobs(false);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (token) {
+      fetchJobsFeed();
+    }
+  }, [token]);
+
   const handleAcceptJob = () => {
     setAgreementJob(null);
     alert("✅ ¡Compromiso confirmado! El empleador ha sido notificado.");
+    fetchJobsFeed();
   };
 
   if (!mounted) return null;
@@ -122,7 +102,11 @@ export default function StudentDashboard() {
         
         {/* Columna Izquierda (65% -> 8 de 12 columnas) */}
         <div className="lg:col-span-8">
-          <LiveGigFeed jobs={DEMO_JOBS} onSelectJob={setAgreementJob} />
+          {isLoadingJobs ? (
+            <div className="py-12 text-center text-slate-500">Cargando trabajos disponibles...</div>
+          ) : (
+            <LiveTrabajoFeed jobs={jobs} onSelectJob={setAgreementJob} />
+          )}
         </div>
 
         {/* Columna Derecha (35% -> 4 de 12 columnas) */}
@@ -144,3 +128,5 @@ export default function StudentDashboard() {
     </div>
   );
 }
+
+

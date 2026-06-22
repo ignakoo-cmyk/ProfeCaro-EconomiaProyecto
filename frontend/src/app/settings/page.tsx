@@ -222,7 +222,7 @@ export default function SettingsPage() {
               <div className="glass-panel bg-white rounded-2xl p-8 space-y-8">
                 <div>
                   <h2 className="text-xl font-black text-slate-900 mb-1">Métodos de Facturación</h2>
-                  <p className="text-sm text-slate-500">Configura cómo pagas por los gigs publicados.</p>
+                  <p className="text-sm text-slate-500">Configura cómo pagas por los trabajos publicados.</p>
                 </div>
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
                   <Receipt className="h-10 w-10 text-slate-300 mx-auto mb-3" />
@@ -238,3 +238,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+

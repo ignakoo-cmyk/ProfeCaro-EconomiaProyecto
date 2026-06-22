@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import Base, engine
-from app.routers import jobs
+from app.routers import jobs, admin
 from app.routers.auth import router as auth_router
 from app.routers.ws import router as ws_router, rest_router as jobs_realtime_router
 from app.seed import seed_admin_user
@@ -88,8 +88,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",    # Next.js dev server
         "http://127.0.0.1:3000",
-        "http://localhost:4001",    # Nuevo puerto del frontend
-        "http://127.0.0.1:4001",
+        "http://localhost:4009",    # Nuevo puerto del frontend
+        "http://127.0.0.1:4009",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -102,6 +102,7 @@ app.add_middleware(
 # =============================================================================
 app.include_router(auth_router)
 app.include_router(jobs.router)
+app.include_router(admin.router)
 app.include_router(jobs_realtime_router)
 app.include_router(ws_router)
 

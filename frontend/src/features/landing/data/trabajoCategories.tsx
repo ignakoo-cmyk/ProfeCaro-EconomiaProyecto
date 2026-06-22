@@ -1,6 +1,6 @@
 import { Utensils, BookOpen, ShoppingBag, Laptop, Package, Users, Coffee, FileText } from 'lucide-react';
 
-export const GIG_CATEGORIES = [
+export const TRABAJO_CATEGORIES = [
   { id: '1', icon: Utensils, label: 'Apoyo en Comida Rápida', color: 'text-orange-500' },
   { id: '2', icon: BookOpen, label: 'Clases Particulares', color: 'text-blue-500' },
   { id: '3', icon: ShoppingBag, label: 'Pick-up Supermercado', color: 'text-emerald-500' },
@@ -10,3 +10,5 @@ export const GIG_CATEGORIES = [
   { id: '7', icon: Coffee, label: 'Barista de Apoyo', color: 'text-rose-500' },
   { id: '8', icon: FileText, label: 'Transcripciones', color: 'text-cyan-500' },
 ];
+
+

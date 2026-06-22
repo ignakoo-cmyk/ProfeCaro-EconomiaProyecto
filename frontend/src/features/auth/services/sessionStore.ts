@@ -28,7 +28,7 @@ interface AuthState {
   clearError: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8009";
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -41,6 +41,50 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
+
+        // --- MOCK AUTHENTICATION ---
+        if (email === "user" && password === "user") {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const user: User = {
+                id: "mock-student-123",
+                email: "user@ventanawork.com",
+                fullName: "Estudiante de Prueba",
+                userType: "STUDENT"
+              };
+              
+              const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+              const payload = btoa(JSON.stringify({ sub: user.id, full_name: user.fullName, role: user.userType }));
+              const fakeToken = `${header}.${payload}.mocksignature`;
+
+              Cookies.set("token", fakeToken, { expires: 1, path: "/" });
+              set({ user, token: fakeToken, isAuthenticated: true, isLoading: false, error: null });
+              resolve({ success: true, role: user.userType });
+            }, 800);
+          });
+        }
+        
+        if (email === "admin" && password === "admin") {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const user: User = {
+                id: "mock-admin-999",
+                email: "admin@ventanawork.com",
+                fullName: "Administrador Supremo",
+                userType: "ADMIN"
+              };
+              
+              const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+              const payload = btoa(JSON.stringify({ sub: user.id, full_name: user.fullName, role: user.userType }));
+              const fakeToken = `${header}.${payload}.mocksignature`;
+
+              Cookies.set("token", fakeToken, { expires: 1, path: "/" });
+              set({ user, token: fakeToken, isAuthenticated: true, isLoading: false, error: null });
+              resolve({ success: true, role: user.userType });
+            }, 800);
+          });
+        }
+        // --- FIN MOCK AUTHENTICATION ---
 
         try {
           // FastAPI OAuth2 Password flow requiere form-data, no JSON
@@ -135,3 +179,4 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+

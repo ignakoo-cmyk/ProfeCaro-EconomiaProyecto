@@ -44,6 +44,7 @@ class UserType(str, enum.Enum):
 
 
 class JobStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
     MATCHED = "MATCHED"
     IN_PROGRESS = "IN_PROGRESS"
@@ -62,6 +63,7 @@ class TransactionStatus(str, enum.Enum):
 # Transiciones Válidas de Estado (State Machine)
 # =============================================================================
 VALID_TRANSITIONS: dict[JobStatus, set[JobStatus]] = {
+    JobStatus.DRAFT: {JobStatus.PUBLISHED, JobStatus.CANCELLED},
     JobStatus.PUBLISHED: {JobStatus.MATCHED, JobStatus.CANCELLED},
     JobStatus.MATCHED: {JobStatus.IN_PROGRESS, JobStatus.CANCELLED},
     JobStatus.IN_PROGRESS: {JobStatus.COMPLETED, JobStatus.CANCELLED},
@@ -125,6 +127,10 @@ class User(Base):
         nullable=False,
         index=True,
     )
+
+    # --- Moderación / Superadmin ---
+    is_superadmin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    account_status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", doc="pending, approved, rejected")
 
     # --- Campos Específicos de STUDENT (Onboarding & Lógica de Negocio) ---
     location = mapped_column(
@@ -225,6 +231,9 @@ class MicroJob(Base):
     status: Mapped[JobStatus] = mapped_column(
         Enum(JobStatus, name="job_status_enum", create_constraint=True),
         nullable=False, default=JobStatus.PUBLISHED, index=True
+    )
+    approval_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending", index=True, doc="pending, approved, rejected"
     )
     secret_code: Mapped[str] = mapped_column(
         String(6), nullable=False, default=lambda: secrets.token_hex(3).upper()

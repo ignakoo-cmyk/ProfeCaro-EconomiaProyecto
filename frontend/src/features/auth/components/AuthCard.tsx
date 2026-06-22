@@ -71,10 +71,10 @@ export const AuthCard = ({ type }: AuthCardProps) => {
 
     try {
       if (isLogin) {
-        // En login asume que el usuario escoge su tipo de cuenta en la UI temporalmente
+        // Usa el rol retornado por el backend
         const result = await login(email, password);
-        if (result.success) {
-          redirectUser(role);
+        if (result.success && result.role) {
+          redirectUser(result.role as 'STUDENT' | 'PYME' | 'ADMIN');
         }
       } else {
         const registerRole = role === 'STUDENT' ? 'student' : 'business';
@@ -92,8 +92,8 @@ export const AuthCard = ({ type }: AuthCardProps) => {
           role: registerRole,
         });
         
-        if (result.success) {
-          redirectUser(role);
+        if (result.success && result.role) {
+          redirectUser(result.role as 'STUDENT' | 'PYME' | 'ADMIN');
         }
       }
     } catch {
@@ -105,9 +105,9 @@ export const AuthCard = ({ type }: AuthCardProps) => {
     if (userRole === 'ADMIN') {
       router.push('/admin');
     } else if (userRole === 'PYME') {
-      router.push('/dashboard/negocio');
+      router.push('/negocio/panel');
     } else {
-      router.push('/dashboard/student');
+      router.push('/estudiante/trabajos');
     }
   };
 
@@ -380,5 +380,6 @@ export const AuthCard = ({ type }: AuthCardProps) => {
     </div>
   );
 };
+
 
 

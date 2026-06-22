@@ -82,7 +82,7 @@ export interface ApiError {
 // =============================================================================
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 
 /**
  * Wrapper genérico para fetch con manejo de errores.
@@ -161,3 +161,4 @@ export async function healthCheck(): Promise<{
 }> {
   return apiFetch("/health");
 }
+

@@ -13,12 +13,16 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.routers.auth import get_current_user
+from app.models.schema import User, MicroJob, JobStatus, UserType
 from app.schemas.responses import (
     ErrorResponse,
     MatchListResponse,
     QRValidationRequest,
     QRValidationResponse,
     StudentMatchResponse,
+    MicroJobCreate,
+    MicroJobResponse,
 )
 from app.services.matching import MatchingServiceError, find_nearby_students
 from app.services.qr_validation import QRValidationError, validate_qr_and_complete
@@ -202,3 +206,178 @@ async def complete_job_with_qr(
         ),
         transaction_id=transaction.id,
     )
+
+
+# =============================================================================
+# POST /api/jobs — Crear Trabajo
+# =============================================================================
+@router.post(
+    "",
+    response_model=MicroJobResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear un nuevo MicroJob",
+)
+async def create_job(
+    job_data: MicroJobCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.PYME:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los empleadores pueden publicar trabajos.",
+        )
+    
+    location = f"SRID=4326;POINT({job_data.longitude} {job_data.latitude})"
+    
+    new_job = MicroJob(
+        title=job_data.title,
+        description=job_data.description,
+        price_clp=job_data.price_clp,
+        duration_hours=job_data.duration_hours,
+        start_time=job_data.start_time,
+        status=JobStatus.PUBLISHED,
+        approval_status="pending",
+        employer_id=current_user.id,
+        location=location
+    )
+    
+    db.add(new_job)
+    db.commit()
+    db.refresh(new_job)
+    
+    return MicroJobResponse(
+        id=new_job.id,
+        title=new_job.title,
+        description=new_job.description,
+        price_clp=new_job.price_clp,
+        duration_hours=new_job.duration_hours,
+        start_time=new_job.start_time,
+        status=new_job.status,
+        approval_status=new_job.approval_status,
+        employer_id=new_job.employer_id,
+        worker_id=new_job.worker_id,
+        created_at=new_job.created_at,
+        latitude=job_data.latitude,
+        longitude=job_data.longitude
+    )
+
+
+# =============================================================================
+# POST /api/jobs/{job_id}/apply — Postular a Trabajo
+# =============================================================================
+@router.post(
+    "/{job_id}/apply",
+    summary="Postular a un trabajo publicado",
+    description="Asigna el trabajo al estudiante que postula si está en estado PUBLISHED.",
+)
+async def apply_for_job(
+    job_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los estudiantes pueden postular a los trabajos.",
+        )
+
+    # Bloquear la fila temporalmente para evitar race conditions (dos estudiantes al mismo tiempo)
+    job = db.query(MicroJob).filter(MicroJob.id == job_id).with_for_update().first()
+    
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trabajo no encontrado.",
+        )
+        
+    if job.status != JobStatus.PUBLISHED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El trabajo ya no está disponible.",
+        )
+        
+    # Cambiar estado a MATCHED y asignar al estudiante
+    job.transition_to(JobStatus.MATCHED)
+    job.worker_id = current_user.id
+    db.commit()
+    
+    return {"message": "Postulación exitosa", "job_id": str(job.id), "status": job.status.value}
+
+
+# =============================================================================
+# GET /api/jobs/feed — Feed de Estudiante
+# =============================================================================
+@router.get(
+    "/feed",
+    response_model=list[MicroJobResponse],
+    summary="Listar trabajos publicados (feed para estudiantes)",
+)
+async def get_job_feed(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los estudiantes pueden ver el feed de trabajos.",
+        )
+        
+    jobs = db.query(MicroJob).filter(
+        MicroJob.status == JobStatus.PUBLISHED,
+        MicroJob.approval_status == 'approved'
+    ).order_by(MicroJob.created_at.desc()).all()
+    
+    result = []
+    for j in jobs:
+        result.append(MicroJobResponse(
+            id=j.id,
+            title=j.title,
+            description=j.description,
+            price_clp=j.price_clp,
+            duration_hours=j.duration_hours,
+            start_time=j.start_time,
+            status=j.status,
+            approval_status=j.approval_status,
+            employer_id=j.employer_id,
+            created_at=j.created_at
+        ))
+    return result
+
+
+# =============================================================================
+# GET /api/jobs/employer — Trabajos del Empleador
+# =============================================================================
+@router.get(
+    "/employer",
+    response_model=list[MicroJobResponse],
+    summary="Listar trabajos del empleador actual",
+)
+async def get_employer_jobs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.PYME:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los empleadores pueden ver sus trabajos.",
+        )
+        
+    jobs = db.query(MicroJob).filter(MicroJob.employer_id == current_user.id).order_by(MicroJob.created_at.desc()).all()
+    
+    result = []
+    for j in jobs:
+        result.append(MicroJobResponse(
+            id=j.id,
+            title=j.title,
+            description=j.description,
+            price_clp=j.price_clp,
+            duration_hours=j.duration_hours,
+            start_time=j.start_time,
+            status=j.status,
+            approval_status=j.approval_status,
+            employer_id=j.employer_id,
+            worker_id=j.worker_id,
+            created_at=j.created_at
+        ))
+    return result

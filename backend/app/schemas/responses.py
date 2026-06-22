@@ -66,6 +66,7 @@ class UserResponse(BaseModel):
     user_type: UserType
     reputation: float | None = None
     is_available: bool | None = None
+    account_status: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -123,6 +124,7 @@ class MicroJobResponse(BaseModel):
     status: JobStatus
     employer_id: uuid.UUID
     worker_id: uuid.UUID | None = None
+    approval_status: str | None = None
     created_at: datetime
 
     # Nota: location (PostGIS Geometry) no se serializa directamente.

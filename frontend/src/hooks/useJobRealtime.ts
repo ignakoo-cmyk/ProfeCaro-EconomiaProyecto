@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 const WS_URL = API_URL.replace("http://", "ws://").replace("https://", "wss://");
 
 export type JobStatus =
@@ -184,3 +184,4 @@ export function useJobRealtime(jobId: string): UseJobRealtimeReturn {
 
   return { jobState, isConnected, connectionMode, subscribers, latency, markArrived, validatePin, lastUpdated };
 }
+

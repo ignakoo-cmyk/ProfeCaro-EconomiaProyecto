@@ -255,3 +255,4 @@ export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps)
     </div>
   );
 }
+

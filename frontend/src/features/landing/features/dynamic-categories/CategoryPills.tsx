@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { GIG_CATEGORIES } from '../../data/gigCategories';
+import { TRABAJO_CATEGORIES } from '../../data/trabajoCategories';
 
 export const CategoryPills = () => {
 
@@ -14,7 +14,7 @@ export const CategoryPills = () => {
       {/* Contenedor del Marquee con animación CSS */}
       <div className="flex w-[200%] animate-marquee group-hover:[animation-play-state:paused] transition-all duration-500">
         <div className="flex gap-6 px-3 w-1/2 justify-around">
-          {GIG_CATEGORIES.map((category) => {
+          {TRABAJO_CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
               <div
@@ -32,7 +32,7 @@ export const CategoryPills = () => {
           })}
         </div>
         <div className="flex gap-6 px-3 w-1/2 justify-around">
-          {GIG_CATEGORIES.map((category) => {
+          {TRABAJO_CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
               <div
@@ -53,3 +53,5 @@ export const CategoryPills = () => {
     </div>
   );
 };
+
+

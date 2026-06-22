@@ -69,3 +69,4 @@ export default function ActionCenter({ balance }: ActionCenterProps) {
     </div>
   );
 }
+

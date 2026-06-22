@@ -205,3 +205,4 @@ export default function AgreementModal({ isOpen, onClose, onAccept, job }: Agree
     </div>
   );
 }
+

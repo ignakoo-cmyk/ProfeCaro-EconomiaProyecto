@@ -17,15 +17,55 @@ import {
   Zap
 } from "lucide-react";
 import Link from "next/link";
+import CreateJobModal from "@/features/business/features/trabajo-management/CreateJobModal";
+
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  price_clp: number;
+  duration_hours: number;
+  start_time: string;
+  status: string;
+  employer_id: string;
+}
 
 export default function NegocioDashboard() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const fetchJobs = async () => {
+    setIsLoadingJobs(true);
+    try {
+      const res = await fetch("http://localhost:8009/api/jobs/employer", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setJobs(data);
+      }
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    } finally {
+      setIsLoadingJobs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchJobs();
+    }
+  }, [token]);
 
   const handleLogout = () => {
     logout();
@@ -50,9 +90,9 @@ export default function NegocioDashboard() {
         <div className="p-4 flex-1">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-3">Gestión de Empleos</p>
           <nav className="space-y-1.5">
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-orange-50 text-orange-700 font-bold rounded-xl transition-colors">
+            <button onClick={() => setIsModalOpen(true)} className="w-full flex items-center gap-3 px-3 py-2.5 bg-orange-50 text-orange-700 font-bold rounded-xl transition-colors">
               <PlusCircle className="w-5 h-5" />
-              Crear nuevo Gig
+              Crear nuevo Trabajo
             </button>
             <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold rounded-xl transition-colors">
               <Briefcase className="w-5 h-5" />
@@ -94,7 +134,7 @@ export default function NegocioDashboard() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input type="text" placeholder="Buscar candidatos o gigs..." className="pl-9 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-xl text-sm w-64 transition-all outline-none" />
+              <input type="text" placeholder="Buscar candidatos o trabajos..." className="pl-9 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-xl text-sm w-64 transition-all outline-none" />
             </div>
             <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <Bell className="w-5 h-5" />
@@ -146,12 +186,14 @@ export default function NegocioDashboard() {
                 </div>
               </div>
               <h3 className="text-3xl font-black text-slate-900 mb-1">45</h3>
-              <p className="text-sm font-medium text-slate-500">Gigs completados (Mes)</p>
+              <p className="text-sm font-medium text-slate-500">Trabajos completados (Mes)</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center items-center bg-gradient-to-br from-orange-500 to-orange-600 text-white transform hover:-translate-y-1 cursor-pointer">
+            <div 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center items-center bg-gradient-to-br from-orange-500 to-orange-600 text-white transform hover:-translate-y-1 cursor-pointer">
               <PlusCircle className="w-8 h-8 mb-3 opacity-90" />
-              <h3 className="text-lg font-bold">Publicar Gig Rápido</h3>
+              <h3 className="text-lg font-bold">Publicar Trabajo Rápido</h3>
               <p className="text-xs text-orange-100 mt-1">Llega a +500 estudiantes</p>
             </div>
           </div>
@@ -175,62 +217,49 @@ export default function NegocioDashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {/* Fila 1 */}
-                  <tr className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">Mesero/a Extra para hora punta</p>
-                      <p className="text-xs font-semibold text-slate-500 mt-0.5">$18.000 (Pago Base)</p>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        Hoy, 13:00 - 15:00
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex -space-x-2 overflow-hidden">
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-slate-200" src="https://i.pravatar.cc/100?img=1" alt=""/>
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-slate-200" src="https://i.pravatar.cc/100?img=2" alt=""/>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-white bg-orange-100 text-xs font-bold text-orange-600">+3</div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">Publicado</span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button className="text-sm font-bold text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-lg transition-colors">
-                        Revisar (5)
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* Fila 2 */}
-                  <tr className="border-b border-slate-50 hover:bg-slate-50 transition-colors bg-blue-50/20">
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">Ayudante de Inventario</p>
-                      <p className="text-xs font-semibold text-slate-500 mt-0.5">$12.000 (Pago Base)</p>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        Hoy, 16:00 - 19:00
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-slate-200" src="https://i.pravatar.cc/100?img=3" alt=""/>
-                        <span className="font-semibold text-slate-700">Juan P.</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold border border-blue-200">Asignado</span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button className="text-sm font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 px-4 py-2 rounded-lg transition-colors shadow-sm">
-                        Ver Detalles
-                      </button>
-                    </td>
-                  </tr>
+                  {isLoadingJobs ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-500">
+                        Cargando trabajos...
+                      </td>
+                    </tr>
+                  ) : jobs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-500">
+                        No tienes ofertas activas. ¡Crea un nuevo trabajo!
+                      </td>
+                    </tr>
+                  ) : (
+                    jobs.map((job) => (
+                      <tr key={job.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td className="p-4">
+                          <p className="font-bold text-slate-900">{job.title}</p>
+                          <p className="text-xs font-semibold text-slate-500 mt-0.5">${job.price_clp.toLocaleString('es-CL')} (Pago Base)</p>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1.5 text-slate-600 font-medium">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            {new Date(job.start_time).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex -space-x-2 overflow-hidden">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-white bg-orange-100 text-xs font-bold text-orange-600">+0</div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">
+                            {job.status === 'PUBLISHED' ? 'Publicado' : job.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <button className="text-sm font-bold text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-lg transition-colors">
+                            Revisar (0)
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -238,6 +267,16 @@ export default function NegocioDashboard() {
 
         </div>
       </main>
+
+      <CreateJobModal 
+        isOpen={isModalOpen} 
+        onClose={() => {
+          setIsModalOpen(false);
+          fetchJobs();
+        }} 
+      />
     </div>
   );
 }
+
+

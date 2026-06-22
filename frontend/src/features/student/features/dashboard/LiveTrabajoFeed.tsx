@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, MapPin, Clock, Navigation } from "lucide-rea
 import JobCard, { DashboardJob } from "./JobCard";
 import { useState } from "react";
 
-interface LiveGigFeedProps {
+interface LiveTrabajoFeedProps {
   jobs: DashboardJob[];
   onSelectJob: (job: DashboardJob) => void;
 }
@@ -17,7 +17,7 @@ const QUICK_FILTERS = [
   { id: "cat_pickup", label: "Pick-up", icon: Navigation },
 ];
 
-export default function LiveGigFeed({ jobs, onSelectJob }: LiveGigFeedProps) {
+export default function LiveTrabajoFeed({ jobs, onSelectJob }: LiveTrabajoFeedProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -44,7 +44,7 @@ export default function LiveGigFeed({ jobs, onSelectJob }: LiveGigFeedProps) {
       <div>
         <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2 mb-1">
           <span className="inline-block h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-          Live Gig Feed
+          Feed de Trabajos
         </h2>
         <p className="text-sm text-slate-500 font-medium">
           Trabajos dinámicos cerca de ti. Actualizado en tiempo real.
@@ -60,7 +60,7 @@ export default function LiveGigFeed({ jobs, onSelectJob }: LiveGigFeedProps) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar pegas por facultad, local o rol..."
+          placeholder="Buscar trabajos por facultad, local o rol..."
           className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-900"
         />
         <button className="absolute inset-y-2 right-2 px-3 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors border border-transparent hover:border-slate-200">
@@ -105,3 +105,5 @@ export default function LiveGigFeed({ jobs, onSelectJob }: LiveGigFeedProps) {
     </div>
   );
 }
+
+

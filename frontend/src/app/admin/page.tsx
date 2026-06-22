@@ -63,7 +63,7 @@ export default function AdminControlCenter() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Buscar usuarios, gigs, tickets..."
+                placeholder="Buscar usuarios, trabajos, tickets..."
                 className="bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-400 transition-colors w-56 shadow-sm"
               />
             </div>
@@ -91,7 +91,7 @@ export default function AdminControlCenter() {
             {[
               { label: "Active Students", value: "1,248", change: "+12%", icon: Users, color: "text-blue-600 bg-blue-50 border-blue-100" },
               { label: "Verified Biz", value: "342", change: "+5%", icon: Store, color: "text-orange-600 bg-orange-50 border-orange-100" },
-              { label: "Completed Gigs", value: "8,992", change: "+24%", icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
+              { label: "Completed Trabajos", value: "8,992", change: "+24%", icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
               { label: "Open Tickets", value: "14", change: "-2", icon: Ticket, color: "text-red-600 bg-red-50 border-red-100" },
               { label: "Revenue MTD", value: "$42k", change: "+18%", icon: DollarSign, color: "text-purple-600 bg-purple-50 border-purple-100" },
             ].map((m, i) => (
@@ -168,10 +168,10 @@ export default function AdminControlCenter() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {[
-                    { id: "TK-8892", user: "Maria Gonzalez", role: "STUDENT", subject: "Retraso pago gig #442", priority: "Alta", status: "Abierto" },
+                    { id: "TK-8892", user: "Maria Gonzalez", role: "STUDENT", subject: "Retraso pago trabajo #442", priority: "Alta", status: "Abierto" },
                     { id: "TK-8891", user: "Café Central", role: "PYME", subject: "Actualizar dirección", priority: "Media", status: "En Progreso" },
                     { id: "TK-8890", user: "Juan Perez", role: "STUDENT", subject: "Verificación rechazada", priority: "Alta", status: "Abierto" },
-                    { id: "TK-8889", user: "Librería Sur", role: "PYME", subject: "No puede publicar gig", priority: "Baja", status: "Abierto" },
+                    { id: "TK-8889", user: "Librería Sur", role: "PYME", subject: "No puede publicar trabajo", priority: "Baja", status: "Abierto" },
                   ].map((ticket, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs text-slate-500">{ticket.id}</td>
@@ -206,12 +206,12 @@ export default function AdminControlCenter() {
           </div>
         </div>
 
-        {/* Right: Live Gig Map */}
+        {/* Right: Live Trabajo Map */}
         <div className="glass-panel bg-white p-6 rounded-2xl flex flex-col">
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <MapPin className="h-5 w-5 text-blue-600" />
-              Live Gig Map
+              Live Trabajo Map
             </h2>
             <div className="flex items-center gap-2 text-xs font-bold bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-emerald-700">
               <Activity className="h-3 w-3 animate-pulse" /> Live · Santiago
@@ -225,7 +225,7 @@ export default function AdminControlCenter() {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h30v30H0V0zm1 1h28v28H1V1z' fill='%23e2e8f0' fill-opacity='0.5' fill-rule='evenodd'/%3E%3C/svg%3E")`
             }} />
 
-            {/* Gig Markers */}
+            {/* Trabajo Markers */}
             <div className="absolute top-[22%] left-[35%]">
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-60" />
@@ -265,7 +265,7 @@ export default function AdminControlCenter() {
           {/* Quick Stats Below Map */}
           <div className="grid grid-cols-3 gap-3 mt-4">
             {[
-              { label: 'Gigs Activos', value: '47', color: 'text-blue-600' },
+              { label: 'Trabajos Activos', value: '47', color: 'text-blue-600' },
               { label: 'Urgentes', value: '5', color: 'text-orange-600' },
               { label: 'En Curso', value: '23', color: 'text-emerald-600' },
             ].map((s, i) => (
@@ -290,3 +290,5 @@ export default function AdminControlCenter() {
     </div>
   );
 }
+
+

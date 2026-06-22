@@ -18,8 +18,8 @@ export default function LandingPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.userType === "ADMIN") router.push("/admin");
-      else if (user.userType === "STUDENT") router.push("/dashboard/student");
-      else router.push("/dashboard/pyme");
+      else if (user.userType === "STUDENT") router.push("/dashboard/estudiante");
+      else router.push("/dashboard/negocio");
     }
   }, [isAuthenticated, user, router]);
 
@@ -53,3 +53,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

@@ -64,3 +64,4 @@ export const HowItWorks = () => {
     </section>
   );
 };
+

@@ -17,7 +17,7 @@ interface StudentActions {
 
 type StudentStore = StudentState & StudentActions;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 
 export const useStudentStore = create<StudentStore>((set) => ({
   jobs: [],
@@ -76,3 +76,4 @@ export const useStudentStore = create<StudentStore>((set) => ({
     set({ error: null });
   },
 }));
+

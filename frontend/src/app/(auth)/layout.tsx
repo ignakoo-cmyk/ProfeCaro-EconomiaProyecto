@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, MapPin, DollarSign, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-const GIGS_DATA = [
+const TRABAJOS_DATA = [
   {
     title: "Apoyo en Inventario",
     location: "Minimarket Barrio República",
@@ -26,14 +26,14 @@ const GIGS_DATA = [
 ];
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const [activeGig, setActiveGig] = useState(0);
+  const [activeTrabajo, setActiveTrabajo] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIsFading(true);
       setTimeout(() => {
-        setActiveGig((prev) => (prev + 1) % GIGS_DATA.length);
+        setActiveTrabajo((prev) => (prev + 1) % TRABAJOS_DATA.length);
         setIsFading(false);
       }, 500); // Duración del fade out
     }, 4000); // Cambia cada 4 segundos
@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     return () => clearInterval(interval);
   }, []);
 
-  const currentGig = GIGS_DATA[activeGig];
+  const currentTrabajo = TRABAJOS_DATA[activeTrabajo];
 
   return (
     <div className="min-h-screen flex w-full">
@@ -70,24 +70,24 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className={`w-[400px] h-[280px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transform -rotate-2 hover:rotate-0 transition-all duration-500 flex flex-col justify-between group ${isFading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
             <div className="flex justify-between items-start">
               <div className="flex gap-2">
-                <span className="px-3 py-1 bg-white/20 rounded-full text-white text-xs font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm">Gig Activo</span>
+                <span className="px-3 py-1 bg-white/20 rounded-full text-white text-xs font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm">Trabajo Activo</span>
               </div>
               <ShieldCheck className="text-emerald-400 w-6 h-6 animate-pulse" />
             </div>
             
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2 leading-tight">{currentGig.title}</h3>
-              <p className="text-blue-100/80 text-sm">{currentGig.location}</p>
+              <h3 className="text-2xl font-bold text-white mb-2 leading-tight">{currentTrabajo.title}</h3>
+              <p className="text-blue-100/80 text-sm">{currentTrabajo.location}</p>
             </div>
             
             <div className="flex items-center gap-4 text-white/90">
               <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg shadow-inner">
                 <DollarSign className="w-4 h-4 text-emerald-400" />
-                <span className="font-bold text-sm">{currentGig.pay}</span>
+                <span className="font-bold text-sm">{currentTrabajo.pay}</span>
               </div>
               <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg shadow-inner">
                 <MapPin className="w-4 h-4 text-blue-300" />
-                <span className="font-medium text-sm">{currentGig.dist}</span>
+                <span className="font-medium text-sm">{currentTrabajo.dist}</span>
               </div>
             </div>
           </div>
@@ -124,3 +124,5 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+
+

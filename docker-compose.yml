@@ -46,43 +46,13 @@ services:
       PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-10}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "8009:8000"
     volumes:
       # Montar código fuente para hot-reload en desarrollo
       - ./backend:/code
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - ventana-network
-
-  # ---------------------------------------------------------------------------
-  # 3. Frontend (Next.js)
-  # ---------------------------------------------------------------------------
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: deps # Apunta a la etapa de dependencias
-    container_name: ventana-frontend
-    restart: unless-stopped
-    command: npm run dev
-    environment:
-      # URL interna para fetch desde el servidor (SSR)
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-      PORT: 4001
-      WATCHPACK_POLLING: "true"
-      CHOKIDAR_USEPOLLING: "true"
-    ports:
-      - "4001:4001" # Mapeo host 4001 -> contenedor 4001
-    volumes:
-      # Bind mount del código fuente para HMR
-      - ./frontend:/app
-      # Ignorar carpetas locales para evitar colisiones con el Linux interno
-      - /app/node_modules
-      - /app/.next
-    depends_on:
-      - backend
     networks:
       - ventana-network
 

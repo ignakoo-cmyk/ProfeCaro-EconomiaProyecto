@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8009";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 
 interface PendingUser {
   id: string;

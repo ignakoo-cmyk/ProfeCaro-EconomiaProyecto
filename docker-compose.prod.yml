@@ -58,6 +58,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=
+        - BACKEND_PROXY_URL=http://backend:8000
     container_name: ventana-frontend-prod
     restart: always
     environment:

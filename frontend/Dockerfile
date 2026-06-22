@@ -21,6 +21,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Deshabilitar telemetría de Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
+# Aceptar variables públicas en tiempo de build
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 # Construir la aplicación
 RUN npm run build
 

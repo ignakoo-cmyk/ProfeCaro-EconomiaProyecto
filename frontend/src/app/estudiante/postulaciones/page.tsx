@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending:      { label: "Pendiente",       color: "bg-slate-50 text-slate-600 border-slate-200" },
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8009";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 
 export default function PostulacionesPage() {
   const { token } = useAuthStore();

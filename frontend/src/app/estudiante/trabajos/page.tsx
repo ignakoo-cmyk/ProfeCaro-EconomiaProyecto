@@ -58,7 +58,7 @@ const MOCK_JOBS: Job[] = [
   }
 ];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8009";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8009";
 
 export default function EstudianteFeedPage() {
   const [activeJobs, setActiveJobs] = useState<Job[]>([]);

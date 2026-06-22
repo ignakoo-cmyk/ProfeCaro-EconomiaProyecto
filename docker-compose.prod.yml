@@ -37,8 +37,8 @@ services:
       dockerfile: Dockerfile
     container_name: ventana-backend-prod
     restart: always
-    # Gunicorn maneja múltiples workers para concurrencia en producción
-    command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+    # Uvicorn con múltiples workers nativos para producción (sin recarga en vivo)
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-ventana_admin}:${POSTGRES_PASSWORD:-ventana_secreta_prod_123}@db:5432/${POSTGRES_DB:-ventana_prod_db}
       - PLATFORM_FEE_PERCENT=${PLATFORM_FEE_PERCENT:-10}

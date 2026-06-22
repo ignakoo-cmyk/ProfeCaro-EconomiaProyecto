@@ -19,10 +19,11 @@ const nextConfig: NextConfig = {
   },
   turbopack: {},
   async rewrites() {
+    const backendUrl = process.env.BACKEND_PROXY_URL || "http://127.0.0.1:8009";
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:8009/api/:path*", // Proxy al backend FastAPI
+        destination: `${backendUrl}/api/:path*`, // Proxy al backend FastAPI
       },
     ];
   },

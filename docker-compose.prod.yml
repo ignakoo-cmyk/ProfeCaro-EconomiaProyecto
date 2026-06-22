@@ -61,6 +61,8 @@ services:
     environment:
       # API_URL vacío para que use rutas relativas a través del proxy de Next.js
       - NEXT_PUBLIC_API_URL=
+      # Le dice a Next.js (que corre en Docker) cómo encontrar al backend interno
+      - BACKEND_PROXY_URL=http://backend:8000
     ports:
       - "8009:3000" # Expone Next.js en el puerto 8009 del servidor Linux
     depends_on:

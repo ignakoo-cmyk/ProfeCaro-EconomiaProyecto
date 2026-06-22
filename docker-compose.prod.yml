@@ -1,0 +1,76 @@
+# =============================================================================
+# Ventana-Work v2 — Docker Compose (PRODUCCIÓN)
+# =============================================================================
+# Orquestación con PostgreSQL, Backend (Gunicorn), y Frontend (Next.js Standalone)
+# Diseñado para desplegar en un servidor Linux (VPS, EC2, Droplet, etc.)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. Base de Datos (PostgreSQL + PostGIS)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: ventana-db-prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ventana-network
+
+  # ---------------------------------------------------------------------------
+  # 2. Backend (Python/FastAPI con Gunicorn para Producción)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ventana-backend-prod
+    restart: always
+    # Gunicorn maneja múltiples workers para concurrencia en producción
+    command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - PLATFORM_FEE_PERCENT=${PLATFORM_FEE_PERCENT:-10}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ventana-network
+
+  # ---------------------------------------------------------------------------
+  # 3. Frontend (Next.js Standalone Build)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ventana-frontend-prod
+    restart: always
+    environment:
+      # API_URL vacío para que use rutas relativas a través del proxy de Next.js
+      - NEXT_PUBLIC_API_URL=
+    ports:
+      - "8009:3000" # Expone Next.js en el puerto 8009 del servidor Linux
+    depends_on:
+      - backend
+    networks:
+      - ventana-network
+
+networks:
+  ventana-network:
+    driver: bridge
+
+volumes:
+  pgdata_prod:
+    driver: local

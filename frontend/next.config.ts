@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination: `${backendUrl}/api/:path*`, // Proxy al backend FastAPI
       },
+      {
+        source: "/auth/:path*",
+        destination: `${backendUrl}/auth/:path*`, // Proxy a rutas de auth
+      },
     ];
   },
 };

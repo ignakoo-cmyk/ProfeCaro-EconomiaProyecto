@@ -44,7 +44,7 @@ export default function SettingsPage() {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <Link href={isPyme ? "/dashboard/pyme" : "/dashboard/student"}
+          <Link href={isPyme ? "/negocio/panel" : "/estudiante/trabajos"}
             className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
             <ArrowLeft className="h-4 w-4 text-slate-600" />
           </Link>

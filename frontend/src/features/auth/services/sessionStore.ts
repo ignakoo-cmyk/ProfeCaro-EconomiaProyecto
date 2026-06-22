@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>()(
             setTimeout(() => {
               const user: User = {
                 id: "mock-admin-999",
-                email: "admin@ventanawork.com",
+                email: "admin@admin.cl",
                 fullName: "Administrador Supremo",
                 userType: "ADMIN"
               };

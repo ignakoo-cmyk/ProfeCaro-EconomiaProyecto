@@ -45,7 +45,7 @@ export function UserDropdown() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-fade-in">
           <button 
-            onClick={() => { setIsOpen(false); /* router.push('/settings') */ }}
+            onClick={() => { setIsOpen(false); router.push('/settings'); }}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <Settings className="w-4 h-4 text-slate-400" />

@@ -381,3 +381,132 @@ async def get_employer_jobs(
             created_at=j.created_at
         ))
     return result
+
+
+# =============================================================================
+# GET /api/jobs/my-applications — Postulaciones del Estudiante
+# =============================================================================
+@router.get(
+    "/my-applications",
+    summary="Listar trabajos a los que el estudiante ha postulado",
+    description="Retorna todos los trabajos donde el estudiante actual es el worker asignado.",
+)
+async def get_my_applications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los estudiantes pueden ver sus postulaciones.",
+        )
+
+    jobs = db.query(MicroJob).filter(
+        MicroJob.worker_id == current_user.id
+    ).order_by(MicroJob.created_at.desc()).all()
+
+    result = []
+    for j in jobs:
+        result.append({
+            "job_id": str(j.id),
+            "job_title": j.title,
+            "address": j.description[:60] + "..." if len(j.description) > 60 else j.description,
+            "reward_amount": j.price_clp,
+            "category": "General",
+            "status": j.status.value,
+            "applied_at": j.created_at.isoformat() if j.created_at else None,
+        })
+    return result
+
+
+# =============================================================================
+# DELETE /api/jobs/{job_id} — Cancelar/Eliminar Trabajo (Empleador)
+# =============================================================================
+@router.delete(
+    "/{job_id}",
+    summary="Cancelar un trabajo publicado",
+    description="El empleador cancela su propio trabajo si está en estado PUBLISHED.",
+)
+async def cancel_job(
+    job_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.user_type != UserType.PYME:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los empleadores pueden cancelar trabajos.",
+        )
+
+    job = db.query(MicroJob).filter(
+        MicroJob.id == job_id,
+        MicroJob.employer_id == current_user.id
+    ).first()
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trabajo no encontrado.",
+        )
+
+    if job.status not in [JobStatus.PUBLISHED, JobStatus.MATCHED]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"No se puede cancelar un trabajo en estado '{job.status.value}'.",
+        )
+
+    job.transition_to(JobStatus.CANCELLED)
+    db.commit()
+    return {"message": "Trabajo cancelado exitosamente.", "job_id": str(job.id)}
+
+
+# =============================================================================
+# GET /api/jobs/{job_id}/detail — Detalle con Estudiante Asignado
+# =============================================================================
+@router.get(
+    "/{job_id}/detail",
+    summary="Ver detalle de un trabajo con info del estudiante asignado",
+)
+async def get_job_detail(
+    job_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    job = db.query(MicroJob).filter(MicroJob.id == job_id).first()
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trabajo no encontrado.",
+        )
+
+    # Solo el empleador o el worker pueden ver el detalle completo
+    if current_user.id != job.employer_id and current_user.id != job.worker_id and current_user.user_type != UserType.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permiso para ver este trabajo.",
+        )
+
+    worker_info = None
+    if job.worker:
+        worker_info = {
+            "id": str(job.worker.id),
+            "full_name": job.worker.full_name,
+            "email": job.worker.email,
+            "reputation": job.worker.reputation,
+            "major": job.worker.major,
+        }
+
+    return {
+        "id": str(job.id),
+        "title": job.title,
+        "description": job.description,
+        "price_clp": job.price_clp,
+        "duration_hours": job.duration_hours,
+        "status": job.status.value,
+        "approval_status": job.approval_status,
+        "created_at": job.created_at.isoformat() if job.created_at else None,
+        "worker": worker_info,
+    }
+
+

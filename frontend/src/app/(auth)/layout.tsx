@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, MapPin, DollarSign, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 
 const TRABAJOS_DATA = [
   {
@@ -63,8 +64,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         
         {/* Floating 3D/Glassmorphism Element con Carrusel */}
         <div className="relative z-10 flex flex-col items-center w-full px-12">
-          <Link href="/" className="absolute -top-32 left-8 text-white font-black text-2xl tracking-tight z-50 hover:opacity-80 transition-opacity">
-            Ventana<span className="text-blue-300">Work</span>
+          <Link href="/" className="absolute -top-32 left-8 z-50 hover:opacity-80 transition-opacity">
+            <Logo size="lg" lightText={true} />
           </Link>
           
           <div className={`w-[400px] h-[280px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transform -rotate-2 hover:rotate-0 transition-all duration-500 flex flex-col justify-between group ${isFading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
@@ -111,8 +112,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Volver al inicio
           </Link>
-          <Link href="/" className="lg:hidden font-black text-xl tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
-            Ventana<span className="text-blue-600">Work</span>
+          <Link href="/" className="lg:hidden hover:opacity-80 transition-opacity">
+            <Logo size="md" />
           </Link>
         </div>
 

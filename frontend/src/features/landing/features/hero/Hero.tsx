@@ -36,7 +36,7 @@ export const Hero = () => {
           </Link>
           <Link 
             href="/register?type=pyme" 
-            className="inline-flex items-center justify-center bg-white border-2 border-orange-100 text-slate-700 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg"
+            className="inline-flex items-center justify-center bg-white border-2 border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-300 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg"
           >
             Necesito Ayuda (Publicar Trabajo)
           </Link>

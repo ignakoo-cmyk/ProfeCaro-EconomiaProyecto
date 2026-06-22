@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 export const Navbar = () => {
   return (
@@ -10,13 +10,8 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-200 group-hover:bg-blue-700 transition-colors">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-black text-slate-900 tracking-tight">
-            Ventana<span className="text-blue-600">Work</span>
-          </span>
+        <Link href="/" className="group">
+          <Logo size="md" />
         </Link>
 
         {/* CTA Buttons */}

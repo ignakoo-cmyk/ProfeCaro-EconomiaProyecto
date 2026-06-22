@@ -34,8 +34,8 @@ async def get_pending_items(
     # Buscar trabajos pendientes (ordenados de más antiguos a más nuevos)
     pending_jobs = db.query(MicroJob).filter(MicroJob.approval_status == 'pending').order_by(MicroJob.created_at.asc()).all()
     
-    # Buscar usuarios pendientes (PYME que necesitan aprobación)
-    pending_users = db.query(User).filter(User.account_status == 'pending', User.user_type == UserType.PYME).order_by(User.created_at.asc()).all()
+    # Buscar usuarios pendientes (Cualquier usuario que necesite aprobación)
+    pending_users = db.query(User).filter(User.account_status == 'pending', User.user_type != UserType.ADMIN).order_by(User.created_at.asc()).all()
     
     return {
         "pending_jobs": [
@@ -54,6 +54,7 @@ async def get_pending_items(
                 "id": str(u.id),
                 "full_name": u.full_name,
                 "email": u.email,
+                "user_type": u.user_type.value,
                 "created_at": u.created_at,
             } for u in pending_users
         ]

@@ -6,10 +6,10 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Redirección si no hay token y se intenta acceder a una ruta protegida
-  const isProtectedRoute = 
-    pathname.startsWith("/estudiante") || 
-    pathname.startsWith("/negocio") || 
-    pathname.startsWith("/admin") || 
+  const isProtectedRoute =
+    pathname.startsWith("/estudiante") ||
+    pathname.startsWith("/negocio") ||
+    pathname.startsWith("/admin") ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/settings");
 
@@ -17,12 +17,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 2. Si hay token, validar el rol de forma eficiente y redirigir según corresponda
+  // 2. Si hay token, validar el rol y redirigir según corresponda
   if (token) {
     try {
       const payloadBase64 = token.split(".")[1];
       if (payloadBase64) {
-        // Decodificación ligera del token JWT
         const decodedPayload = JSON.parse(atob(payloadBase64));
         const role = decodedPayload.user_type || decodedPayload.role || "STUDENT";
 
@@ -35,7 +34,7 @@ export function proxy(request: NextRequest) {
         if (pathname.startsWith("/estudiante") && role !== "STUDENT" && role !== "ADMIN") {
           return NextResponse.redirect(new URL("/negocio/panel", request.url));
         }
-        
+
         // Evitar que usuarios ya autenticados vuelvan a la pantalla de login/registro
         if (pathname === "/login" || pathname === "/register") {
           if (role === "STUDENT") {
@@ -50,11 +49,9 @@ export function proxy(request: NextRequest) {
         }
       }
     } catch (error) {
-      console.error("Error decodificando token en proxy:", error);
-      // Si el token es inválido y está corrupto, lo tratamos como no autenticado si intenta ir a rutas protegidas
+      console.error("Error decodificando token en middleware:", error);
       if (isProtectedRoute) {
         const response = NextResponse.redirect(new URL("/login", request.url));
-        // Opcional: Limpiar la cookie corrupta para evitar loops
         response.cookies.delete("token");
         return response;
       }
@@ -64,7 +61,6 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configuración del matcher de rutas
 export const config = {
   matcher: [
     "/estudiante/:path*",
@@ -73,7 +69,7 @@ export const config = {
     "/dashboard/:path*",
     "/settings/:path*",
     "/login",
-    "/register"
+    "/register",
   ],
 };
 

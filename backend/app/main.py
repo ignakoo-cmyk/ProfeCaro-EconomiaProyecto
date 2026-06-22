@@ -85,13 +85,8 @@ app = FastAPI(
 # En producción, restringir a los dominios reales.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",    # Next.js dev server
-        "http://127.0.0.1:3000",
-        "http://localhost:4009",    # Nuevo puerto del frontend
-        "http://127.0.0.1:4009",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

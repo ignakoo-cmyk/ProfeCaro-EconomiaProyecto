@@ -24,7 +24,7 @@ def seed_admin_user():
     """
     db: Session = SessionLocal()
     try:
-        admin_email = "admin"
+        admin_email = "admin@admin.cl"
         # Verificar si el admin ya existe
         admin = db.query(User).filter(User.email == admin_email).first()
         
@@ -36,12 +36,18 @@ def seed_admin_user():
                 hashed_password=hashed_pw,
                 full_name="Super Administrador",
                 user_type=UserType.ADMIN,
+                is_superadmin=True,
             )
             db.add(new_admin)
             db.commit()
             print("✅ Usuario ADMIN creado exitosamente.")
         else:
-            print("✅ Usuario ADMIN ya existe.")
+            if not admin.is_superadmin:
+                admin.is_superadmin = True
+                db.commit()
+                print("✅ Usuario ADMIN existente actualizado con privilegios de superadmin.")
+            else:
+                print("✅ Usuario ADMIN ya existe y es superadmin.")
     except Exception as e:
         print(f"❌ Error al crear el seed de admin: {e}")
         db.rollback()

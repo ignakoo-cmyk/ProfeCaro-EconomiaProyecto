@@ -15,7 +15,7 @@ export const AuthCard = ({ type }: AuthCardProps) => {
   const { login, register, isLoading, error, clearError } = useAuthStore();
   
   const [viewMode, setViewMode] = useState<'login' | 'register'>(type);
-  const [role, setRole] = useState<'STUDENT' | 'PYME'>('STUDENT');
+  const [role, setRole] = useState<'STUDENT' | 'PYME' | 'ADMIN'>('STUDENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   

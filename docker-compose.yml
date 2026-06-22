@@ -4,8 +4,6 @@
 # Orquestación con PostgreSQL + Hot Module Replacement (HMR) Activo
 # =============================================================================
 
-version: "3.9"
-
 services:
   # ---------------------------------------------------------------------------
   # 1. Base de Datos (PostgreSQL + PostGIS)
